@@ -6,12 +6,12 @@ endif()
 project(ImageViewer)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 include("${PROJECT_SOURCE_DIR}/cmake/utils.cmake")
-set(PROJECT_VERSION 2.0.0 CACHE STRING "ImageViewer version")
+set(PROJECT_VERSION 2.0.1 CACHE STRING "ImageViewer version")
 DISSECT_VERSION()
 set(PROJECT_DESCRIPTION "Image Viewer Component with common camera interface 2.0")
-set(PROJECT_VENDOR "Kenichi Ohara, Meijo University")
-set(PROJECT_AUTHOR "Kenichi Ohara, Meijo University")
-set(PROJECT_AUTHOR_SHORT "Kenichi Ohara, Meijo University")
+set(PROJECT_VENDOR "MasutaniLab")
+set(PROJECT_AUTHOR "MasutaniLab")
+set(PROJECT_AUTHOR_SHORT "MasutaniLab")
 
 # Add an "uninstall" target
 CONFIGURE_FILE ("${PROJECT_SOURCE_DIR}/cmake/uninstall_target.cmake.in"

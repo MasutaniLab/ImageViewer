@@ -8,6 +8,7 @@
  */
 
 #include "ImageViewer.h"
+using namespace std;
 
 // Module specification
 // <rtc-template block="module_spec">
@@ -16,8 +17,8 @@ static const char* imageviewer_spec[] =
     "implementation_id", "ImageViewer",
     "type_name",         "ImageViewer",
     "description",       "Image Viewer Component with common camera interface 2.0",
-    "version",           "2.0.0",
-    "vendor",            "Kenichi Ohara, Meijo University",
+    "version",           "2.0.1",
+    "vendor",            "MasutaniLab",
     "category",          "ImageProcessing",
     "activity_type",     "PERIODIC",
     "kind",              "DataFlowComponent",
@@ -26,9 +27,13 @@ static const char* imageviewer_spec[] =
     "lang_type",         "compile",
     // Configuration variables
     "conf.default.capture_frame_num", "0",
+
     // Widget
     "conf.__widget__.capture_frame_num", "text",
     // Constraints
+
+    "conf.__type__.capture_frame_num", "int",
+
     ""
   };
 // </rtc-template>
@@ -58,6 +63,7 @@ ImageViewer::~ImageViewer()
 
 RTC::ReturnCode_t ImageViewer::onInitialize()
 {
+  cout << "ImageViewer::onInitialize()" << endl;
   // Registration: InPort/OutPort/Service
   // <rtc-template block="registration">
   // Set InPort buffers
@@ -107,6 +113,7 @@ RTC::ReturnCode_t ImageViewer::onShutdown(RTC::UniqueId ec_id)
 
 RTC::ReturnCode_t ImageViewer::onActivated(RTC::UniqueId ec_id)
 {
+  cout << "ImageViewer::onActivated()" << endl;
   PortServiceList* portlist;
   
   portlist = this->get_ports();
@@ -163,6 +170,7 @@ RTC::ReturnCode_t ImageViewer::onActivated(RTC::UniqueId ec_id)
 
 RTC::ReturnCode_t ImageViewer::onDeactivated(RTC::UniqueId ec_id)
 {
+  cout << "ImageViewer::onDeactivated()" << endl;
   if(connection_check[1]){
 	//連続キャプチャモードの場合は、キャプチャを停止
     if(m_capture_frame_num == 0)
