@@ -63,7 +63,7 @@ ImageViewer::~ImageViewer()
 
 RTC::ReturnCode_t ImageViewer::onInitialize()
 {
-  cout << "ImageViewer::onInitialize()" << endl;
+  RTC_INFO(("onInitialize()"));
   // Registration: InPort/OutPort/Service
   // <rtc-template block="registration">
   // Set InPort buffers
@@ -113,7 +113,7 @@ RTC::ReturnCode_t ImageViewer::onShutdown(RTC::UniqueId ec_id)
 
 RTC::ReturnCode_t ImageViewer::onActivated(RTC::UniqueId ec_id)
 {
-  cout << "ImageViewer::onActivated()" << endl;
+  RTC_INFO(("onActivated()"));
   PortServiceList* portlist;
   
   portlist = this->get_ports();
@@ -134,35 +134,31 @@ RTC::ReturnCode_t ImageViewer::onActivated(RTC::UniqueId ec_id)
       //連続画像取得モードに設定
 	  if(m_capture_frame_num == 0)
 	  {
-		std::cout << "start continuous image streaming." << std::endl;
 		RTC_INFO(("Send command of \"start continuous\" via CameraCaptureService."));
 		m_CameraCaptureService->start_continuous();
 	  }
 	  //1shotキャプチャモードに設定
 	  else if(m_capture_frame_num == 1)
 	  {
-		std::cout << "take one frame." << std::endl;
 		RTC_INFO(("Send command of \"take one frame\" via CameraCaptureService."));
 		m_CameraCaptureService->take_one_frame();
 	  }
 	  //指定枚数キャプチャモードに設定
 	  else if(m_capture_frame_num > 1)
 	  {
-		std::cout << "take multi frames (" << m_capture_frame_num << " frames)." << std::endl;
 		RTC_INFO(("Send command of \"take multi frames\" via CameraCaptureService."));
 		m_CameraCaptureService->take_multi_frames(m_capture_frame_num);
 	  }
 	  else
 	  {
-		std::cerr << "Please set capture_frame_num to more than 0" << std::endl;
 		RTC_ERROR(("Configuration Param <frames_num> should be over 0. [%d]",m_capture_frame_num));
 		return RTC::RTC_ERROR;
 	  }
   }
 
   cv::namedWindow("Image Window", CV_WINDOW_AUTOSIZE);
-  std::cout << "Start image view" << std::endl;
-  std::cout << "If you want to take a 1 shot image as image file, please push s on Captured Image Window!" << std::endl;
+  RTC_INFO(("Start image view"));
+  RTC_INFO(("If you want to take a 1 shot image as image file, please push s on Captured Image Window!"));
 
   return RTC::RTC_OK;
 }
@@ -170,12 +166,11 @@ RTC::ReturnCode_t ImageViewer::onActivated(RTC::UniqueId ec_id)
 
 RTC::ReturnCode_t ImageViewer::onDeactivated(RTC::UniqueId ec_id)
 {
-  cout << "ImageViewer::onDeactivated()" << endl;
+  RTC_INFO(("onDeactivated()"));
   if(connection_check[1]){
 	//連続キャプチャモードの場合は、キャプチャを停止
     if(m_capture_frame_num == 0)
 	{
-      std::cout << "Stop image streaming" << std::endl;
       RTC_INFO(("Send command of \"stop continuous\" via CameraCaptureService."));
       m_CameraCaptureService->stop_continuous();
     }
@@ -186,7 +181,7 @@ RTC::ReturnCode_t ImageViewer::onDeactivated(RTC::UniqueId ec_id)
   
   //描画ウィンドウの消去
   cv::destroyWindow("Image Window");
-  std::cout << "Stop image view" << std::endl;
+  RTC_INFO(("Stop image view"));
 
   //描画用画像メモリの解放
   image.release();
