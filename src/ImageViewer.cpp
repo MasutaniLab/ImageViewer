@@ -1,4 +1,4 @@
-// -*- C++ -*-
+ï»¿// -*- C++ -*-
 /*!
  * @file  ImageViewer.cpp
  * @brief Image Viewer Component with common camera interface 2.0
@@ -27,12 +27,16 @@ static const char* imageviewer_spec[] =
     "lang_type",         "compile",
     // Configuration variables
     "conf.default.capture_frame_num", "0",
+    "conf.default.BGR", "0",
 
     // Widget
     "conf.__widget__.capture_frame_num", "text",
+    "conf.__widget__.BGR", "radio",
     // Constraints
+    "conf.__constraints__.BGR", "(0,1)",
 
     "conf.__type__.capture_frame_num", "int",
+    "conf.__type__.BGR", "int",
 
     ""
   };
@@ -84,6 +88,7 @@ RTC::ReturnCode_t ImageViewer::onInitialize()
   // <rtc-template block="bind_config">
   // Bind variables and configuration variable
   bindParameter("capture_frame_num", m_capture_frame_num, "0");
+  bindParameter("BGR", m_BGR, "0");
   // </rtc-template>
   
   return RTC::RTC_OK;
@@ -128,22 +133,22 @@ RTC::ReturnCode_t ImageViewer::onActivated(RTC::UniqueId ec_id)
       connection_check[i]=false;
   }
 
-  //ƒT[ƒrƒXƒ|[ƒgÚ‘±ó‘Ô‚Ìƒ`ƒFƒbƒN
+  //ã‚µãƒ¼ãƒ“ã‚¹ãƒãƒ¼ãƒˆæ¥ç¶šçŠ¶æ…‹ã®ãƒã‚§ãƒƒã‚¯
   if(connection_check[1])
   {
-      //˜A‘±‰æ‘œæ“¾ƒ‚[ƒh‚Éİ’è
+      //é€£ç¶šç”»åƒå–å¾—ãƒ¢ãƒ¼ãƒ‰ã«è¨­å®š
 	  if(m_capture_frame_num == 0)
 	  {
 		RTC_INFO(("Send command of \"start continuous\" via CameraCaptureService."));
 		m_CameraCaptureService->start_continuous();
 	  }
-	  //1shotƒLƒƒƒvƒ`ƒƒƒ‚[ƒh‚Éİ’è
+	  //1shotã‚­ãƒ£ãƒ—ãƒãƒ£ãƒ¢ãƒ¼ãƒ‰ã«è¨­å®š
 	  else if(m_capture_frame_num == 1)
 	  {
 		RTC_INFO(("Send command of \"take one frame\" via CameraCaptureService."));
 		m_CameraCaptureService->take_one_frame();
 	  }
-	  //w’è–‡”ƒLƒƒƒvƒ`ƒƒƒ‚[ƒh‚Éİ’è
+	  //æŒ‡å®šæšæ•°ã‚­ãƒ£ãƒ—ãƒãƒ£ãƒ¢ãƒ¼ãƒ‰ã«è¨­å®š
 	  else if(m_capture_frame_num > 1)
 	  {
 		RTC_INFO(("Send command of \"take multi frames\" via CameraCaptureService."));
@@ -168,7 +173,7 @@ RTC::ReturnCode_t ImageViewer::onDeactivated(RTC::UniqueId ec_id)
 {
   RTC_INFO(("onDeactivated()"));
   if(connection_check[1]){
-	//˜A‘±ƒLƒƒƒvƒ`ƒƒƒ‚[ƒh‚Ìê‡‚ÍAƒLƒƒƒvƒ`ƒƒ‚ğ’â~
+	//é€£ç¶šã‚­ãƒ£ãƒ—ãƒãƒ£ãƒ¢ãƒ¼ãƒ‰ã®å ´åˆã¯ã€ã‚­ãƒ£ãƒ—ãƒãƒ£ã‚’åœæ­¢
     if(m_capture_frame_num == 0)
 	{
       RTC_INFO(("Send command of \"stop continuous\" via CameraCaptureService."));
@@ -179,11 +184,11 @@ RTC::ReturnCode_t ImageViewer::onDeactivated(RTC::UniqueId ec_id)
   if(connection_check != NULL)
 	delete [] connection_check;
   
-  //•`‰æƒEƒBƒ“ƒhƒE‚ÌÁ‹
+  //æç”»ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®æ¶ˆå»
   cv::destroyWindow("Image Window");
   RTC_INFO(("Stop image view"));
 
-  //•`‰æ—p‰æ‘œƒƒ‚ƒŠ‚Ì‰ğ•ú
+  //æç”»ç”¨ç”»åƒãƒ¡ãƒ¢ãƒªã®è§£æ”¾
   image.release();
 
   return RTC::RTC_OK;
@@ -217,7 +222,7 @@ RTC::ReturnCode_t ImageViewer::onExecute(RTC::UniqueId ec_id)
 		{
 			for(int i=0; i<height; ++i)
 				memcpy(&image.data[i*image.step],&m_Image.data.image.raw_data[i*width*channels],sizeof(unsigned char)*width*channels);
-			if(channels == 3)
+			if(channels == 3 && m_BGR == 0)
 				cv::cvtColor(image, image, CV_RGB2BGR);
 		}
 		else if( m_Image.data.image.format == Img::CF_JPEG || m_Image.data.image.format == Img::CF_PNG )
@@ -230,7 +235,11 @@ RTC::ReturnCode_t ImageViewer::onExecute(RTC::UniqueId ec_id)
 			if(channels == 3)
 			{
 				decoded_image = cv::imdecode(cv::Mat(compressed_image), CV_LOAD_IMAGE_COLOR);
-				cv::cvtColor(decoded_image, image, CV_RGB2BGR);
+                if (m_BGR == 0) {
+                  cv::cvtColor(decoded_image, image, CV_RGB2BGR);
+                } else {
+                  image = decoded_image;
+                }
 			}
 			else
 			{
@@ -240,7 +249,7 @@ RTC::ReturnCode_t ImageViewer::onExecute(RTC::UniqueId ec_id)
 		}
   }
 
-  //‰æ‘œƒf[ƒ^‚ª“ü‚Á‚Ä‚¢‚éê‡‚Í‰æ‘œ‚ğ•\¦
+  //ç”»åƒãƒ‡ãƒ¼ã‚¿ãŒå…¥ã£ã¦ã„ã‚‹å ´åˆã¯ç”»åƒã‚’è¡¨ç¤º
   if(!image.empty())
   {
 /*

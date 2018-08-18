@@ -31,7 +31,8 @@
 
 // Service Consumer stub headers
 // <rtc-template block="consumer_stub_h">
-using namespace Img;
+#include "CameraCommonInterfaceStub.h"
+
 // </rtc-template>
 
 //Include File for OpenCV functions
@@ -240,6 +241,12 @@ class ImageViewer
    * - DefaultValue: 0
    */
   int m_capture_frame_num;
+  /*!
+   * 
+   * - Name:  BGR
+   * - DefaultValue: 0
+   */
+  int m_BGR;
 
   // </rtc-template>
 

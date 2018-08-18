@@ -107,6 +107,7 @@ The available configuration parameters are described below:
 Parameter        Data type          Default Value    Effect
 ================ ================== ================ ======
 capture_frame_num int                0                
+BGR              int                0                
 ================ ================== ================ ======
 
 Ports

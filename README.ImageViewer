@@ -10,7 +10,7 @@
 #   --module-desc='Image Viewer Component with common camera interface 2.0' --module-version=2.0.1 --module-vendor=MasutaniLab 
 #   --module-category=ImageProcessing --module-comp-type=STATIC 
 #   --module-act-type=PERIODIC --module-max-inst=1 
-#   --config=capture_frame_num:int:0 
+#   --config=capture_frame_num:int:0 --config=BGR:int:0 
 #   --inport=Image:Img::TimedCameraImage 
 #   --consumer-idl=C:\Program Files\OpenRTM-aist\1.1.2\rtm\idl\CameraCommonInterface.idl 
 #   --consumer=CameraCaptureService:CameraCaptureService:Img::CameraCaptureService 
@@ -122,6 +122,14 @@ Lang Type:
 # <rtc-template block="configuration">
 	Configuration:
 		Name:             capture_frame_num
+		Description:     
+		Type:            int
+		DefaultValue:     0
+		Unit:            
+		Range:           
+		Constraint:      
+
+		Name:             BGR
 		Description:     
 		Type:            int
 		DefaultValue:     0
