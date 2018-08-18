@@ -31,7 +31,6 @@
 
 // Service Consumer stub headers
 // <rtc-template block="consumer_stub_h">
-#include "CameraCommonInterfaceStub.h"
 
 // </rtc-template>
 
