@@ -240,12 +240,6 @@ class ImageViewer
    * - DefaultValue: 0
    */
   int m_capture_frame_num;
-  /*!
-   * 
-   * - Name:  BGR
-   * - DefaultValue: 0
-   */
-  int m_BGR;
 
   // </rtc-template>
 
