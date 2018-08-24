@@ -230,13 +230,12 @@ RTC::ReturnCode_t ImageViewer::onExecute(RTC::UniqueId ec_id)
 			if(channels == 3)
 			{
 				decoded_image = cv::imdecode(cv::Mat(compressed_image), CV_LOAD_IMAGE_COLOR);
-				cv::cvtColor(decoded_image, image, CV_RGB2BGR);
 			}
 			else
 			{
-				decoded_image = cv::imdecode(cv::Mat(compressed_image), CV_LOAD_IMAGE_GRAYSCALE);
-				image = decoded_image;
+				decoded_image = cv::imdecode(cv::Mat(compressed_image), CV_LOAD_IMAGE_GRAYSCALE);				
 			}
+                        image = decoded_image;
 		}
   }
 
