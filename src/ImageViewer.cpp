@@ -1,4 +1,4 @@
-// -*- C++ -*-
+ï»¿// -*- C++ -*-
 /*!
  * @file  ImageViewer.cpp
  * @brief Image Viewer Component with common camera interface 2.0
@@ -9,6 +9,7 @@
 
 #include "ImageViewer.h"
 using namespace std;
+using namespace zbar;
 
 // Module specification
 // <rtc-template block="module_spec">
@@ -128,22 +129,22 @@ RTC::ReturnCode_t ImageViewer::onActivated(RTC::UniqueId ec_id)
       connection_check[i]=false;
   }
 
-  //ƒT[ƒrƒXƒ|[ƒgÚ‘±ó‘Ô‚Ìƒ`ƒFƒbƒN
+  //ã‚µãƒ¼ãƒ“ã‚¹ãƒãƒ¼ãƒˆæ¥ç¶šçŠ¶æ…‹ã®ãƒã‚§ãƒƒã‚¯
   if(connection_check[1])
   {
-      //˜A‘±‰æ‘œæ“¾ƒ‚[ƒh‚Éİ’è
+      //é€£ç¶šç”»åƒå–å¾—ãƒ¢ãƒ¼ãƒ‰ã«è¨­å®š
 	  if(m_capture_frame_num == 0)
 	  {
 		RTC_INFO(("Send command of \"start continuous\" via CameraCaptureService."));
 		m_CameraCaptureService->start_continuous();
 	  }
-	  //1shotƒLƒƒƒvƒ`ƒƒƒ‚[ƒh‚Éİ’è
+	  //1shotã‚­ãƒ£ãƒ—ãƒãƒ£ãƒ¢ãƒ¼ãƒ‰ã«è¨­å®š
 	  else if(m_capture_frame_num == 1)
 	  {
 		RTC_INFO(("Send command of \"take one frame\" via CameraCaptureService."));
 		m_CameraCaptureService->take_one_frame();
 	  }
-	  //w’è–‡”ƒLƒƒƒvƒ`ƒƒƒ‚[ƒh‚Éİ’è
+	  //æŒ‡å®šæšæ•°ã‚­ãƒ£ãƒ—ãƒãƒ£ãƒ¢ãƒ¼ãƒ‰ã«è¨­å®š
 	  else if(m_capture_frame_num > 1)
 	  {
 		RTC_INFO(("Send command of \"take multi frames\" via CameraCaptureService."));
@@ -160,6 +161,8 @@ RTC::ReturnCode_t ImageViewer::onActivated(RTC::UniqueId ec_id)
   RTC_INFO(("Start image view"));
   RTC_INFO(("If you want to take a 1 shot image as image file, please push s on Captured Image Window!"));
 
+  m_scanner.set_config(ZBAR_NONE, ZBAR_CFG_ENABLE, 1);
+
   return RTC::RTC_OK;
 }
 
@@ -168,7 +171,7 @@ RTC::ReturnCode_t ImageViewer::onDeactivated(RTC::UniqueId ec_id)
 {
   RTC_INFO(("onDeactivated()"));
   if(connection_check[1]){
-	//˜A‘±ƒLƒƒƒvƒ`ƒƒƒ‚[ƒh‚Ìê‡‚ÍAƒLƒƒƒvƒ`ƒƒ‚ğ’â~
+	//é€£ç¶šã‚­ãƒ£ãƒ—ãƒãƒ£ãƒ¢ãƒ¼ãƒ‰ã®å ´åˆã¯ã€ã‚­ãƒ£ãƒ—ãƒãƒ£ã‚’åœæ­¢
     if(m_capture_frame_num == 0)
 	{
       RTC_INFO(("Send command of \"stop continuous\" via CameraCaptureService."));
@@ -179,11 +182,11 @@ RTC::ReturnCode_t ImageViewer::onDeactivated(RTC::UniqueId ec_id)
   if(connection_check != NULL)
 	delete [] connection_check;
   
-  //•`‰æƒEƒBƒ“ƒhƒE‚ÌÁ‹
+  //æç”»ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®æ¶ˆå»
   cv::destroyWindow("Image Window");
   RTC_INFO(("Stop image view"));
 
-  //•`‰æ—p‰æ‘œƒƒ‚ƒŠ‚Ì‰ğ•ú
+  //æç”»ç”¨ç”»åƒãƒ¡ãƒ¢ãƒªã®è§£æ”¾
   image.release();
 
   return RTC::RTC_OK;
@@ -235,14 +238,14 @@ RTC::ReturnCode_t ImageViewer::onExecute(RTC::UniqueId ec_id)
 			{
 				decoded_image = cv::imdecode(cv::Mat(compressed_image), CV_LOAD_IMAGE_GRAYSCALE);				
 			}
-                        image = decoded_image;
+      image = decoded_image;
 		}
   }
 
-  //‰æ‘œƒf[ƒ^‚ª“ü‚Á‚Ä‚¢‚éê‡‚Í‰æ‘œ‚ğ•\¦
+  //ç”»åƒãƒ‡ãƒ¼ã‚¿ãŒå…¥ã£ã¦ã„ã‚‹å ´åˆã¯ç”»åƒã‚’è¡¨ç¤º
   if(!image.empty())
   {
-/*
+    /*
 	  //Communication Time
 		coil::TimeValue tm(coil::gettimeofday());
 		std::cout<< "Communication Time: " << tm.usec() - (m_Image.tm.nsec / 1000) << "\r";
@@ -250,16 +253,45 @@ RTC::ReturnCode_t ImageViewer::onExecute(RTC::UniqueId ec_id)
 		cv::imshow("Image Window", image);
   }
 
-  char key = cv::waitKey(3);
-
-  //Image save process
-  if ( key == 's')
-  {
-    char file[80];
-    sprintf( file, "CapturedImage%03d.png",++saved_image_counter);
-    cv::imwrite( file, image );
+  int key = cv::waitKey(3);
+  if (key == 'r') {
+    cv::Mat grey;
+    if (channels == 3) {
+      cv::cvtColor(image, grey, CV_BGR2GRAY);
+    } else {
+      grey = image;
+    }
+    int width = grey.size().width;
+    int height = grey.size().height;
+    uchar *raw = grey.data;
+    Image zbarImage(width, height, "Y800", raw, width * height);
+    int n = m_scanner.scan(zbarImage);
+    if (n == 0)
+    {
+      cout << "Cannot recognize." << endl;
+    }
+    else
+    {
+      for (Image::SymbolIterator symbol = zbarImage.symbol_begin();
+           symbol != zbarImage.symbol_end(); ++symbol)
+      {
+        cout << "decoded " << symbol->get_type_name()
+             << " symbol \"" << symbol->get_data() << '"' << " " << endl;
+      }
+    }
+  } else if (key == 's') {
+    const int N = 32;
+    char filename[N];
+    time_t timer;
+    struct tm *timeptr;
+    timer = time(NULL);
+    timeptr = localtime(&timer);
+    strftime(filename, N, "%Y%m%d%H%M%S.png", timeptr);
+    RTC_INFO(("Saving image to \"%s\" ...", filename)); 
+    cv::imwrite(filename, image);
+    RTC_INFO(("done."));
   }
-
+  
   return RTC::RTC_OK;
 }
 
