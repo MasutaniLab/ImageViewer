@@ -31,6 +31,7 @@
 
 // Service Consumer stub headers
 // <rtc-template block="consumer_stub_h">
+#include "CameraCommonInterfaceStub.h"
 
 // </rtc-template>
 
@@ -241,6 +242,30 @@ class ImageViewer
    * - DefaultValue: 0
    */
   int m_capture_frame_num;
+  /*!
+   * 
+   * - Name:  zbar
+   * - DefaultValue: 0
+   */
+  short int m_zbar;
+  /*!
+   * 
+   * - Name:  windowTitle
+   * - DefaultValue: ImageViewer
+   */
+  std::string m_windowTitle;
+  /*!
+   * 
+   * - Name:  windowX
+   * - DefaultValue: 0
+   */
+  short int m_windowX;
+  /*!
+   * 
+   * - Name:  windowY
+   * - DefaultValue: 0
+   */
+  short int m_windowY;
 
   // </rtc-template>
 
