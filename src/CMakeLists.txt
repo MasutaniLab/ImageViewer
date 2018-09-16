@@ -1,7 +1,14 @@
 set(comp_srcs ImageViewer.cpp )
 set(standalone_srcs ImageViewerComp.cpp)
 
-set(ZBAR_LIBRARIES -lzbar)
+if (MSVC)
+  set(ZBAR_DIR "${PROJECT_SOURCE_DIR}/../ZBarWin64" CACHE PATH "Path of ZBar library")
+  set(ZBAR_INCLUDE_DIRS "${ZBAR_DIR}/include")
+  set(ZBAR_LIVRARY_DIRS "${ZBAR_DIR}/lib")
+  set(ZBAR_LIBRARIES libzbar64-0)
+else (MSVC)
+  set(ZBAR_LIBRARIES -lzbar)
+endif (MSVC)
 
 find_package(OpenCV REQUIRED)
 
@@ -43,6 +50,7 @@ include_directories(${PROJECT_BINARY_DIR}/idl)
 include_directories(${OPENRTM_INCLUDE_DIRS})
 include_directories(${OMNIORB_INCLUDE_DIRS})
 include_directories(${OPENCV_INCLUDE_DIRS})
+include_directories(${ZBAR_INCLUDE_DIRS})
 
 add_definitions(${OPENRTM_CFLAGS})
 add_definitions(${OMNIORB_CFLAGS})
@@ -52,6 +60,7 @@ MAP_ADD_STR(comp_hdrs "../" comp_headers)
 link_directories(${OPENRTM_LIBRARY_DIRS})
 link_directories(${OMNIORB_LIBRARY_DIRS})
 link_directories(${OPENCV_LIBRARY_DIRS})
+link_directories(${ZBAR_LIVRARY_DIRS})
 
 add_library(${PROJECT_NAME} ${LIB_TYPE} ${comp_srcs}
   ${comp_headers} ${ALL_IDL_SRCS})
