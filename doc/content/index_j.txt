@@ -101,8 +101,14 @@ ImageViewerは ``ImageViewerComp`` を実行（ ``${prefix}/components/bin`` に
 capture_frame_num int                0                
 zbar             short              0                
 windowTitle      string             ImageViewer      
-windowX          short              0                
-windowY          short              0                
+window1X         short              0                
+window1Y         short              0                
+window1Width     short              320              
+window1Height    short              180              
+window2X         short              0                
+window2Y         short              0                
+window2Width     short              1280             
+window2Height    short              720              
 ================ ================== ================ ====
 
 ポート
@@ -114,6 +120,7 @@ windowY          short              0
 ポート名        ポート型    データ型                       意味
 =============== =========== ============================== ====
 Image           InPort      Img::TimedCameraImage          
+switch          OutPort     RTC::TimedBoolean              
 CameraCaptureService ServicePort Img::CameraCaptureService      
 =============== =========== ============================== ====
 

@@ -10,8 +10,8 @@
 #   --module-desc='Image Viewer Component with common camera interface 2.0' --module-version=2.0.1 --module-vendor=MasutaniLab 
 #   --module-category=ImageProcessing --module-comp-type=STATIC 
 #   --module-act-type=PERIODIC --module-max-inst=1 
-#   --config=capture_frame_num:int:0 --config=zbar:short:0 --config=windowTitle:string:ImageViewer --config=windowX:short:0 --config=windowY:short:0 
-#   --inport=Image:Img::TimedCameraImage 
+#   --config=capture_frame_num:int:0 --config=zbar:short:0 --config=windowTitle:string:ImageViewer --config=window1X:short:0 --config=window1Y:short:0 --config=window1Width:short:320 --config=window1Height:short:180 --config=window2X:short:0 --config=window2Y:short:0 --config=window2Width:short:1280 --config=window2Height:short:720 
+#   --inport=Image:Img::TimedCameraImage --outport=switch:RTC::TimedBoolean 
 #   --consumer-idl=C:\Program Files\OpenRTM-aist\1.1.2\rtm\idl\CameraCommonInterface.idl 
 #   --consumer=CameraCaptureService:CameraCaptureService:Img::CameraCaptureService 
 
@@ -94,6 +94,24 @@ Lang Type:
 ======================================================================
 # <rtc-template block="outport">
 
+	Name:        switch
+	PortNumber:  0
+	Description: 
+	PortType: 
+	DataType:    RTC::TimedBoolean
+	MaxOut: 
+	[Data Elements]
+		Name:
+		Type:            
+		Number:          
+		Semantics:       
+		Unit:            
+		Frequency:       
+		Operation Cycle: 
+		RangeLow:
+		RangeHigh:
+		DefaultValue:
+
 
 # </rtc-template>
 
@@ -145,7 +163,7 @@ Lang Type:
 		Range:           
 		Constraint:      
 
-		Name:             windowX
+		Name:             window1X
 		Description:     
 		Type:            short
 		DefaultValue:     0
@@ -153,10 +171,58 @@ Lang Type:
 		Range:           
 		Constraint:      
 
-		Name:             windowY
+		Name:             window1Y
 		Description:     
 		Type:            short
 		DefaultValue:     0
+		Unit:            
+		Range:           
+		Constraint:      
+
+		Name:             window1Width
+		Description:     
+		Type:            short
+		DefaultValue:     320
+		Unit:            
+		Range:           
+		Constraint:      
+
+		Name:             window1Height
+		Description:     
+		Type:            short
+		DefaultValue:     180
+		Unit:            
+		Range:           
+		Constraint:      
+
+		Name:             window2X
+		Description:     
+		Type:            short
+		DefaultValue:     0
+		Unit:            
+		Range:           
+		Constraint:      
+
+		Name:             window2Y
+		Description:     
+		Type:            short
+		DefaultValue:     0
+		Unit:            
+		Range:           
+		Constraint:      
+
+		Name:             window2Width
+		Description:     
+		Type:            short
+		DefaultValue:     1280
+		Unit:            
+		Range:           
+		Constraint:      
+
+		Name:             window2Height
+		Description:     
+		Type:            short
+		DefaultValue:     720
 		Unit:            
 		Range:           
 		Constraint:      

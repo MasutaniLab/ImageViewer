@@ -14,42 +14,60 @@ using namespace zbar;
 // Module specification
 // <rtc-template block="module_spec">
 static const char* imageviewer_spec[] =
-{
-  "implementation_id", "ImageViewer",
-  "type_name",         "ImageViewer",
-  "description",       "Image Viewer Component with common camera interface 2.0",
-  "version",           "2.0.1",
-  "vendor",            "MasutaniLab",
-  "category",          "ImageProcessing",
-  "activity_type",     "PERIODIC",
-  "kind",              "DataFlowComponent",
-  "max_instance",      "1",
-  "language",          "C++",
-  "lang_type",         "compile",
-  // Configuration variables
-  "conf.default.capture_frame_num", "0",
-  "conf.default.zbar", "0",
-  "conf.default.windowTitle", "ImageViewer",
-  "conf.default.windowX", "0",
-  "conf.default.windowY", "0",
+  {
+    "implementation_id", "ImageViewer",
+    "type_name",         "ImageViewer",
+    "description",       "Image Viewer Component with common camera interface 2.0",
+    "version",           "2.0.1",
+    "vendor",            "MasutaniLab",
+    "category",          "ImageProcessing",
+    "activity_type",     "PERIODIC",
+    "kind",              "DataFlowComponent",
+    "max_instance",      "1",
+    "language",          "C++",
+    "lang_type",         "compile",
+    // Configuration variables
+    "conf.default.capture_frame_num", "0",
+    "conf.default.zbar", "0",
+    "conf.default.windowTitle", "ImageViewer",
+    "conf.default.window1X", "0",
+    "conf.default.window1Y", "0",
+    "conf.default.window1Width", "320",
+    "conf.default.window1Height", "180",
+    "conf.default.window2X", "0",
+    "conf.default.window2Y", "0",
+    "conf.default.window2Width", "1280",
+    "conf.default.window2Height", "720",
 
-  // Widget
-  "conf.__widget__.capture_frame_num", "text",
-  "conf.__widget__.zbar", "radio",
-  "conf.__widget__.windowTitle", "text",
-  "conf.__widget__.windowX", "text",
-  "conf.__widget__.windowY", "text",
-  // Constraints
-  "conf.__constraints__.zbar", "(0,1)",
+    // Widget
+    "conf.__widget__.capture_frame_num", "text",
+    "conf.__widget__.zbar", "radio",
+    "conf.__widget__.windowTitle", "text",
+    "conf.__widget__.window1X", "text",
+    "conf.__widget__.window1Y", "text",
+    "conf.__widget__.window1Width", "text",
+    "conf.__widget__.window1Height", "text",
+    "conf.__widget__.window2X", "text",
+    "conf.__widget__.window2Y", "text",
+    "conf.__widget__.window2Width", "text",
+    "conf.__widget__.window2Height", "text",
+    // Constraints
+    "conf.__constraints__.zbar", "(0,1)",
 
-  "conf.__type__.capture_frame_num", "int",
-  "conf.__type__.zbar", "short",
-  "conf.__type__.windowTitle", "string",
-  "conf.__type__.windowX", "short",
-  "conf.__type__.windowY", "short",
+    "conf.__type__.capture_frame_num", "int",
+    "conf.__type__.zbar", "short",
+    "conf.__type__.windowTitle", "string",
+    "conf.__type__.window1X", "short",
+    "conf.__type__.window1Y", "short",
+    "conf.__type__.window1Width", "short",
+    "conf.__type__.window1Height", "short",
+    "conf.__type__.window2X", "short",
+    "conf.__type__.window2Y", "short",
+    "conf.__type__.window2Width", "short",
+    "conf.__type__.window2Height", "short",
 
-  ""
-};
+    ""
+  };
 // </rtc-template>
 
 /*!
@@ -59,8 +77,9 @@ static const char* imageviewer_spec[] =
 ImageViewer::ImageViewer(RTC::Manager* manager)
 // <rtc-template block="initializer">
   : RTC::DataFlowComponentBase(manager),
-  m_ImageIn("Image", m_Image),
-  m_CameraCaptureServicePort("CameraCaptureService")
+    m_ImageIn("Image", m_Image),
+    m_switchOut("switch", m_switch),
+    m_CameraCaptureServicePort("CameraCaptureService")
 
   // </rtc-template>
 {
@@ -82,17 +101,18 @@ RTC::ReturnCode_t ImageViewer::onInitialize()
   // <rtc-template block="registration">
   // Set InPort buffers
   addInPort("Image", m_ImageIn);
-
+  
   // Set OutPort buffer
-
+  addOutPort("switch", m_switchOut);
+  
   // Set service provider to Ports
-
+  
   // Set service consumers to Ports
   m_CameraCaptureServicePort.registerConsumer("CameraCaptureService", "Img::CameraCaptureService", m_CameraCaptureService);
-
+  
   // Set CORBA Service Ports
   addPort(m_CameraCaptureServicePort);
-
+  
   // </rtc-template>
 
   // <rtc-template block="bind_config">
@@ -100,8 +120,14 @@ RTC::ReturnCode_t ImageViewer::onInitialize()
   bindParameter("capture_frame_num", m_capture_frame_num, "0");
   bindParameter("zbar", m_zbar, "0");
   bindParameter("windowTitle", m_windowTitle, "ImageViewer");
-  bindParameter("windowX", m_windowX, "0");
-  bindParameter("windowY", m_windowY, "0");
+  bindParameter("window1X", m_window1X, "0");
+  bindParameter("window1Y", m_window1Y, "0");
+  bindParameter("window1Width", m_window1Width, "320");
+  bindParameter("window1Height", m_window1Height, "180");
+  bindParameter("window2X", m_window2X, "0");
+  bindParameter("window2Y", m_window2Y, "0");
+  bindParameter("window2Width", m_window2Width, "1280");
+  bindParameter("window2Height", m_window2Height, "720");
   // </rtc-template>
 
   return RTC::RTC_OK;
@@ -173,8 +199,12 @@ RTC::ReturnCode_t ImageViewer::onActivated(RTC::UniqueId ec_id)
     }
   }
 
-  cv::namedWindow(m_windowTitle.c_str(), CV_WINDOW_AUTOSIZE);
-  cv::moveWindow(m_windowTitle.c_str(), m_windowX, m_windowY);
+  cv::namedWindow(m_windowTitle.c_str(), CV_WINDOW_NORMAL| CV_WINDOW_KEEPRATIO);
+  cv::moveWindow(m_windowTitle.c_str(), m_window1X, m_window1Y);
+  cv::resizeWindow(m_windowTitle.c_str(), m_window1Width, m_window1Height);
+  m_windowConf = 1;
+  m_cameraOn = true;
+  m_os.str("");
   RTC_INFO(("Start image view"));
   RTC_INFO(("If you want to take a 1 shot image as image file, please push s on Captured Image Window!"));
 
@@ -214,6 +244,23 @@ RTC::ReturnCode_t ImageViewer::onDeactivated(RTC::UniqueId ec_id)
 
 RTC::ReturnCode_t ImageViewer::onExecute(RTC::UniqueId ec_id)
 {
+  int key = cv::waitKey(3);
+  if (key == 'm') {
+    m_windowConf = 3 - m_windowConf;
+    RTC_INFO(("m_windowConf: %d", m_windowConf));
+    if (m_windowConf == 1) {
+      cv::moveWindow(m_windowTitle.c_str(), m_window1X, m_window1Y);
+      cv::resizeWindow(m_windowTitle.c_str(), m_window1Width, m_window1Height);
+    } else {
+      cv::moveWindow(m_windowTitle.c_str(), m_window2X, m_window2Y);
+      cv::resizeWindow(m_windowTitle.c_str(), m_window2Width, m_window2Height);
+    } 
+  } else if (key == 'o') {
+    m_cameraOn = !m_cameraOn;
+    RTC_INFO(("m_cameraOn: %d", m_cameraOn));
+    m_switch.data = m_cameraOn;
+    m_switchOut.write();
+  }
   //Inport data check
   if (m_ImageIn.isNew())
   {
@@ -259,18 +306,7 @@ RTC::ReturnCode_t ImageViewer::onExecute(RTC::UniqueId ec_id)
     }
   }
 
-  //画像データが入っている場合は画像を表示
-  if (!image.empty())
-  {
-    /*
-    //Communication Time
-    coil::TimeValue tm(coil::gettimeofday());
-    std::cout<< "Communication Time: " << tm.usec() - (m_Image.tm.nsec / 1000) << "\r";
-    */
-    cv::imshow(m_windowTitle.c_str(), image);
-  }
 
-  int key = cv::waitKey(3);
   if (key == 's') {
     const int N = 32;
     char filename[N];
@@ -295,19 +331,32 @@ RTC::ReturnCode_t ImageViewer::onExecute(RTC::UniqueId ec_id)
       int height = grey.size().height;
       uchar *raw = grey.data;
       Image zbarImage(width, height, "Y800", raw, width * height);
+      m_os.str("");
       int n = m_scanner.scan(zbarImage);
       if (n == 0)
       {
-        cout << "Cannot recognize." << endl;
+        m_os << "Cannot recognize.";
       } else
       {
         for (Image::SymbolIterator symbol = zbarImage.symbol_begin();
           symbol != zbarImage.symbol_end(); ++symbol)
         {
-          cout << "decoded " << symbol->get_type_name()
-            << " symbol \"" << symbol->get_data() << '"' << " " << endl;
+          m_os << symbol->get_type_name() << " \"" << symbol->get_data() << "\" ";
         }
       }
+      RTC_INFO((m_os.str().c_str()));
+    }
+    //画像データが入っている場合は画像を表示
+    if (!image.empty())
+    {
+      /*
+      //Communication Time
+      coil::TimeValue tm(coil::gettimeofday());
+      std::cout<< "Communication Time: " << tm.usec() - (m_Image.tm.nsec / 1000) << "\r";
+      */
+      cv::putText(image, m_os.str(), cv::Point(0, image.size().height-10), cv::FONT_HERSHEY_SIMPLEX, 0.5,
+          cv::Scalar(255, 255, 255));
+      cv::imshow(m_windowTitle.c_str(), image);
     }
   }
 

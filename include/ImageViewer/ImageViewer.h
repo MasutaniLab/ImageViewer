@@ -31,6 +31,7 @@
 
 // Service Consumer stub headers
 // <rtc-template block="consumer_stub_h">
+#include "CameraCommonInterfaceStub.h"
 
 // </rtc-template>
 
@@ -40,6 +41,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <zbar.h>
+#include <iostream>
+#include <sstream>
 
 using namespace RTC;
 
@@ -255,16 +258,52 @@ class ImageViewer
   std::string m_windowTitle;
   /*!
    * 
-   * - Name:  windowX
+   * - Name:  window1X
    * - DefaultValue: 0
    */
-  short int m_windowX;
+  short int m_window1X;
   /*!
    * 
-   * - Name:  windowY
+   * - Name:  window1Y
    * - DefaultValue: 0
    */
-  short int m_windowY;
+  short int m_window1Y;
+  /*!
+   * 
+   * - Name:  window1Width
+   * - DefaultValue: 320
+   */
+  short int m_window1Width;
+  /*!
+   * 
+   * - Name:  window1Height
+   * - DefaultValue: 180
+   */
+  short int m_window1Height;
+  /*!
+   * 
+   * - Name:  window2X
+   * - DefaultValue: 0
+   */
+  short int m_window2X;
+  /*!
+   * 
+   * - Name:  window2Y
+   * - DefaultValue: 0
+   */
+  short int m_window2Y;
+  /*!
+   * 
+   * - Name:  window2Width
+   * - DefaultValue: 1280
+   */
+  short int m_window2Width;
+  /*!
+   * 
+   * - Name:  window2Height
+   * - DefaultValue: 720
+   */
+  short int m_window2Height;
 
   // </rtc-template>
 
@@ -280,6 +319,10 @@ class ImageViewer
 
   // DataOutPort declaration
   // <rtc-template block="outport_declare">
+  RTC::TimedBoolean m_switch;
+  /*!
+   */
+  OutPort<RTC::TimedBoolean> m_switchOut;
   
   // </rtc-template>
 
@@ -316,6 +359,9 @@ class ImageViewer
   cv::Mat	image;
   bool		*connection_check;
   zbar::ImageScanner m_scanner;
+  int m_windowConf;
+  bool m_cameraOn;
+  std::ostringstream m_os;
 };
 
 
