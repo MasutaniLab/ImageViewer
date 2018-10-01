@@ -18,11 +18,6 @@
 #include <rtm/idl/BasicDataTypeSkel.h>
 #include <rtm/idl/ExtendedDataTypesSkel.h>
 #include <rtm/idl/InterfaceDataTypesSkel.h>
-#ifdef _MSC_VER
-#include <rtm/idl/CameraCommonInterfaceSkel.h>
-#else
-#include <rtm/ext/CameraCommonInterfaceSkel.h>
-#endif
 
 // Service implementation headers
 // <rtc-template block="service_impl_h">
@@ -31,9 +26,13 @@
 
 // Service Consumer stub headers
 // <rtc-template block="consumer_stub_h">
-#include "CameraCommonInterfaceStub.h"
 
 // </rtc-template>
+#ifdef _MSC_VER
+#include <rtm/idl/CameraCommonInterfaceSkel.h>
+#else
+#include <rtm/ext/CameraCommonInterfaceSkel.h>
+#endif
 
 //Include File for OpenCV functions
 #include <opencv2/core/core.hpp>
