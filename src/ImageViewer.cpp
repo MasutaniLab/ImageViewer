@@ -161,6 +161,7 @@ RTC::ReturnCode_t ImageViewer::onActivated(RTC::UniqueId ec_id)
   PortServiceList* portlist;
 
   portlist = this->get_ports();
+  RTC_INFO(("portlist->length(): %d", portlist->length()))
   connection_check = new bool[portlist->length()];
   for (unsigned int i = 0; i < portlist->length(); ++i)
   {
@@ -172,8 +173,9 @@ RTC::ReturnCode_t ImageViewer::onActivated(RTC::UniqueId ec_id)
       connection_check[i] = false;
   }
 
+  //connection_check[2]がサービスポートになる保証はあるのか？
   //サービスポート接続状態のチェック
-  if (connection_check[1])
+  if (connection_check[2])
   {
     //連続画像取得モードに設定
     if (m_capture_frame_num == 0)
@@ -219,7 +221,8 @@ RTC::ReturnCode_t ImageViewer::onActivated(RTC::UniqueId ec_id)
 RTC::ReturnCode_t ImageViewer::onDeactivated(RTC::UniqueId ec_id)
 {
   RTC_INFO(("onDeactivated()"));
-  if (connection_check[1]) {
+  //connection_check[2]がサービスポートになる保証はあるのか？
+  if (connection_check[2]) {
     //連続キャプチャモードの場合は、キャプチャを停止
     if (m_capture_frame_num == 0)
     {
@@ -304,60 +307,66 @@ RTC::ReturnCode_t ImageViewer::onExecute(RTC::UniqueId ec_id)
       }
       image = decoded_image;
     }
-  }
-
-
-  if (key == 's') {
-    const int N = 32;
-    char filename[N];
-    time_t timer;
-    struct tm *timeptr;
-    timer = time(NULL);
-    timeptr = localtime(&timer);
-    strftime(filename, N, "%Y%m%d%H%M%S.png", timeptr);
-    RTC_INFO(("Saving image to \"%s\" ...", filename));
-    cv::imwrite(filename, image);
-    RTC_INFO(("done."));
-  }
-  if (m_zbar) {
-    if (key == 'r') {
-      cv::Mat grey;
-      if (channels == 3) {
-        cv::cvtColor(image, grey, CV_BGR2GRAY);
-      } else {
-        grey = image;
-      }
-      int width = grey.size().width;
-      int height = grey.size().height;
-      uchar *raw = grey.data;
-      Image zbarImage(width, height, "Y800", raw, width * height);
-      m_os.str("");
-      int n = m_scanner.scan(zbarImage);
-      if (n == 0)
-      {
-        m_os << "Cannot recognize.";
-      } else
-      {
-        for (Image::SymbolIterator symbol = zbarImage.symbol_begin();
-          symbol != zbarImage.symbol_end(); ++symbol)
-        {
-          m_os << symbol->get_type_name() << " \"" << symbol->get_data() << "\" ";
+    if (key == 's') {
+      const int N = 32;
+      char filename[N];
+      time_t timer;
+      struct tm *timeptr;
+      timer = time(NULL);
+      timeptr = localtime(&timer);
+      strftime(filename, N, "%Y%m%d%H%M%S.png", timeptr);
+      RTC_INFO(("Saving image to \"%s\" ...", filename));
+      cv::imwrite(filename, image);
+      RTC_INFO(("done."));
+    }
+    if (m_zbar) {
+      if (key == 'r') {
+        cv::Mat grey;
+        if (channels == 3) {
+          cv::cvtColor(image, grey, CV_BGR2GRAY);
+        } else {
+          grey = image;
         }
+        int width = grey.size().width;
+        int height = grey.size().height;
+        uchar *raw = grey.data;
+        Image zbarImage(width, height, "Y800", raw, width * height);
+        m_os.str("");
+        int n = m_scanner.scan(zbarImage);
+        if (n == 0)
+        {
+          m_os << "Cannot recognize.";
+        } else
+        {
+          for (Image::SymbolIterator symbol = zbarImage.symbol_begin();
+            symbol != zbarImage.symbol_end(); ++symbol)
+          {
+            m_os << symbol->get_type_name() << " \"" << symbol->get_data() << "\" ";
+          }
+        }
+        RTC_INFO((m_os.str().c_str()));
       }
-      RTC_INFO((m_os.str().c_str()));
     }
-    //画像データが入っている場合は画像を表示
-    if (!image.empty())
-    {
-      /*
-      //Communication Time
-      coil::TimeValue tm(coil::gettimeofday());
-      std::cout<< "Communication Time: " << tm.usec() - (m_Image.tm.nsec / 1000) << "\r";
-      */
-      cv::putText(image, m_os.str(), cv::Point(0, image.size().height-10), cv::FONT_HERSHEY_SIMPLEX, 0.5,
-          cv::Scalar(255, 255, 255));
-      cv::imshow(m_windowTitle.c_str(), image);
+
+  } //if (m_ImageIn.isNew())のブロックここまで
+
+  //画像データが入っている場合は画像を表示
+  if (!image.empty())
+  {
+    /*
+    //Communication Time
+    coil::TimeValue tm(coil::gettimeofday());
+    std::cout<< "Communication Time: " << tm.usec() - (m_Image.tm.nsec / 1000) << "\r";
+    */
+    cv::putText(image, m_os.str(), cv::Point(0, image.size().height - 20), cv::FONT_HERSHEY_SIMPLEX, 0.5,
+      cv::Scalar(255, 255, 255));
+    if (!m_cameraOn) {
+      cv::putText(image, "OFF", 
+        cv::Point(image.size().width*0.35, image.size().height*0.5), 
+        cv::FONT_HERSHEY_SIMPLEX, 8,
+        cv::Scalar(0, 0, 255), 8);
     }
+    cv::imshow(m_windowTitle.c_str(), image);
   }
 
   return RTC::RTC_OK;
