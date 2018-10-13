@@ -361,6 +361,7 @@ class ImageViewer
   int m_windowConf;
   bool m_cameraOn;
   std::ostringstream m_os;
+  std::string m_resultPrev;
 };
 
 

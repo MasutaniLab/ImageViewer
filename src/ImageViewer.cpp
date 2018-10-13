@@ -207,11 +207,14 @@ RTC::ReturnCode_t ImageViewer::onActivated(RTC::UniqueId ec_id)
   m_windowConf = 1;
   m_cameraOn = true;
   m_os.str("");
+  m_resultPrev = "";
   RTC_INFO(("Start image view"));
   RTC_INFO(("If you want to take a 1 shot image as image file, please push s on Captured Image Window!"));
 
   if (m_zbar) {
-    m_scanner.set_config(ZBAR_NONE, ZBAR_CFG_ENABLE, 1);
+    //QRコードのみを対象とする
+    m_scanner.set_config(ZBAR_NONE, ZBAR_CFG_ENABLE, 0);
+    m_scanner.set_config(ZBAR_QRCODE, ZBAR_CFG_ENABLE, 1);
   }
 
   return RTC::RTC_OK;
@@ -247,6 +250,7 @@ RTC::ReturnCode_t ImageViewer::onDeactivated(RTC::UniqueId ec_id)
 
 RTC::ReturnCode_t ImageViewer::onExecute(RTC::UniqueId ec_id)
 {
+  cv::Scalar colorText(0, 0, 255);
   int key = cv::waitKey(3);
   if (key == 'm') {
     m_windowConf = 3 - m_windowConf;
@@ -320,31 +324,29 @@ RTC::ReturnCode_t ImageViewer::onExecute(RTC::UniqueId ec_id)
       RTC_INFO(("done."));
     }
     if (m_zbar) {
-      if (key == 'r') {
-        cv::Mat grey;
-        if (channels == 3) {
-          cv::cvtColor(image, grey, CV_BGR2GRAY);
-        } else {
-          grey = image;
-        }
-        int width = grey.size().width;
-        int height = grey.size().height;
-        uchar *raw = grey.data;
-        Image zbarImage(width, height, "Y800", raw, width * height);
+      cv::Mat grey;
+      if (channels == 3) {
+        cv::cvtColor(image, grey, CV_BGR2GRAY);
+      } else {
+        grey = image;
+      }
+      int width = grey.size().width;
+      int height = grey.size().height;
+      uchar *raw = grey.data;
+      Image zbarImage(width, height, "Y800", raw, width * height);
+      int n = m_scanner.scan(zbarImage);
+      if (n != 0) {
         m_os.str("");
-        int n = m_scanner.scan(zbarImage);
-        if (n == 0)
-        {
-          m_os << "Cannot recognize.";
-        } else
-        {
-          for (Image::SymbolIterator symbol = zbarImage.symbol_begin();
-            symbol != zbarImage.symbol_end(); ++symbol)
-          {
-            m_os << symbol->get_type_name() << " \"" << symbol->get_data() << "\" ";
-          }
+        colorText = cv::Scalar(0, 255, 0);
+        for (Image::SymbolIterator symbol = zbarImage.symbol_begin();
+          symbol != zbarImage.symbol_end(); ++symbol) {
+          m_os << symbol->get_type_name() << " \"" << symbol->get_data() << "\" ";
         }
-        RTC_INFO((m_os.str().c_str()));
+        string result = m_os.str();
+        if (result != m_resultPrev) {
+          RTC_INFO((result.c_str()));
+          m_resultPrev = result;
+        }        
       }
     }
 
@@ -358,8 +360,7 @@ RTC::ReturnCode_t ImageViewer::onExecute(RTC::UniqueId ec_id)
     coil::TimeValue tm(coil::gettimeofday());
     std::cout<< "Communication Time: " << tm.usec() - (m_Image.tm.nsec / 1000) << "\r";
     */
-    cv::putText(image, m_os.str(), cv::Point(0, image.size().height - 20), cv::FONT_HERSHEY_SIMPLEX, 0.5,
-      cv::Scalar(255, 255, 255));
+    cv::putText(image, m_os.str(), cv::Point(0, image.size().height - 20), cv::FONT_HERSHEY_SIMPLEX, 0.5, colorText);
     if (!m_cameraOn) {
       cv::putText(image, "OFF", 
         cv::Point(image.size().width*0.35, image.size().height*0.5), 
