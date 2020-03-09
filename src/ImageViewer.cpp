@@ -189,6 +189,7 @@ RTC::ReturnCode_t ImageViewer::onDeactivated(RTC::UniqueId ec_id)
   return RTC::RTC_OK;
 }
 
+#define print(x) cout << #x ": " << x << endl;
 
 RTC::ReturnCode_t ImageViewer::onExecute(RTC::UniqueId ec_id)
 {
@@ -199,16 +200,19 @@ RTC::ReturnCode_t ImageViewer::onExecute(RTC::UniqueId ec_id)
     		
 		width = m_Image.data.image.width;
 		height = m_Image.data.image.height;
-		channels = (m_Image.data.image.format == Img::CF_GRAY) ? 1 :
+		channels = (m_Image.data.image.format == Img::CF_GRAY || m_Image.data.image.format == Img::Y16) ? 1 :
 			   (m_Image.data.image.format == Img::CF_RGB || m_Image.data.image.format == Img::CF_PNG || m_Image.data.image.format == Img::CF_JPEG) ? 3 :
 			   (m_Image.data.image.raw_data.length()/width/height);
 		RTC_TRACE(("Capture image size %d x %d", width, height));
 		RTC_TRACE(("Channels %d", channels));
 		
-		if(channels == 3)
-			image.create(height, width, CV_8UC3);
-		else
-			image.create(height, width, CV_8UC1);		
+        if (channels == 3) {
+          image.create(height, width, CV_8UC3);
+        } else if (m_Image.data.image.format == Img::CF_GRAY) {
+          image.create(height, width, CV_8UC1);
+        } else if (m_Image.data.image.format == Img::Y16) {
+          image.create(height, width, CV_16SC1);
+        }
 
 		long data_length = m_Image.data.image.raw_data.length();
 		//long image_size = width * height * channels;
@@ -220,6 +224,11 @@ RTC::ReturnCode_t ImageViewer::onExecute(RTC::UniqueId ec_id)
 			if(channels == 3)
 				cv::cvtColor(image, image, CV_RGB2BGR);
 		}
+        else if (m_Image.data.image.format == Img::Y16) {
+          for (int i = 0; i < height; ++i) {
+            memcpy(&image.data[i*image.step], &m_Image.data.image.raw_data[i*width*channels*sizeof(int16_t)], sizeof(int16_t)*width*channels);
+          }
+        }
 		else if( m_Image.data.image.format == Img::CF_JPEG || m_Image.data.image.format == Img::CF_PNG )
 		{
 			std::vector<uchar> compressed_image = std::vector<uchar>(data_length);
