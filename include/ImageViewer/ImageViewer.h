@@ -287,9 +287,9 @@ class ImageViewer
   // <rtc-template block="private_operation">
   
   // </rtc-template>
-  int		width, height, channels, saved_image_counter;
-  cv::Mat	image;
-  bool		*connection_check;
+   int      width, height, channels, saved_image_counter;
+   cv::Mat  image;
+   bool     *connection_check;
 
 };
 
